@@ -4,26 +4,25 @@ namespace Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Pages
 
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
-use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Facades\SaleOrder;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Actions as BaseActions;
+use Webkul\Support\Concerns\HasRepeaterColumnManager;
+use Webkul\Support\Traits\HasRecordNavigationTabs;
 
 class EditQuotation extends EditRecord
 {
+    use HasRecordNavigationTabs;
+    use HasRepeaterColumnManager;
+
     protected static string $resource = QuotationResource::class;
 
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('edit', ['record' => $this->getRecord()]);
-    }
-
-    public static function getSubNavigationPosition(): SubNavigationPosition
-    {
-        return SubNavigationPosition::Top;
     }
 
     protected function getSavedNotification(): ?Notification

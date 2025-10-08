@@ -5,7 +5,6 @@ namespace Webkul\Recruitment\Filament\Clusters\Applications\Resources;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
-use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
@@ -16,7 +15,6 @@ use Filament\Tables\Table;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\JobPositionResource;
 use Webkul\Recruitment\Filament\Clusters\Applications;
 use Webkul\Recruitment\Filament\Clusters\Applications\Resources\JobByPositionResource\Pages\ListJobByPositions;
-use Webkul\Recruitment\Models\Applicant;
 use Webkul\Recruitment\Models\JobPosition;
 
 class JobByPositionResource extends Resource
@@ -28,8 +26,6 @@ class JobByPositionResource extends Resource
     protected static ?string $cluster = Applications::class;
 
     protected static ?int $navigationSort = 1;
-
-    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getModelLabel(): string
     {
@@ -49,6 +45,12 @@ class JobByPositionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query
+                ->withCount([
+                    'applications as new_applicants_count' => fn ($query) => $query->where('stage_id', 1),
+                    'applications as total_applicants_count',
+                ])
+            )
             ->columns([
                 Stack::make([
                     Stack::make([
@@ -84,9 +86,7 @@ class JobByPositionResource extends Resource
             ->recordActions([
                 Action::make('applications')
                     ->label(function ($record) {
-                        $totalNewApplicantCount = Applicant::where('job_id', $record->id)
-                            ->where('stage_id', 1)
-                            ->count();
+                        $totalNewApplicantCount = $record->new_applicants_count ?? 0;
 
                         return __('recruitments::filament/clusters/applications/resources/job-by-application.table.actions.applications.new-applications', [
                             'count' => $totalNewApplicantCount,
@@ -135,8 +135,7 @@ class JobByPositionResource extends Resource
                         ->size(Size::Large),
                     Action::make('total_applications')
                         ->label(function ($record) {
-                            $totalApplicantCount = Applicant::where('job_id', $record->id)
-                                ->count();
+                            $totalApplicantCount = $record->total_applicants_count ?? 0;
 
                             return __('recruitments::filament/clusters/applications/resources/job-by-application.table.actions.total-application.total-application', [
                                 'count' => $totalApplicantCount,
