@@ -3,6 +3,9 @@
 /npm-debug.log
 /public/build
 /public/hot
+/public/css
+/public/js
+/public/fonts
 /public/storage
 /storage/*.key
 /storage/pail
